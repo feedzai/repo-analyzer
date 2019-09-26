@@ -1,0 +1,12 @@
+node_modules
+tmp
+coverage
+
+src/repoList.json
+report.json
+report.txt
+fe-analyzer-config.json
+yarn-error.log 
+.vscode
+.idea
+tempfile

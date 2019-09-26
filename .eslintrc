@@ -1,0 +1,3 @@
+{
+    "extends": "@feedzai/eslint-config-feedzai-react"
+}
