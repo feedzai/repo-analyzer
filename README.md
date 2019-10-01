@@ -1,7 +1,7 @@
 # Frontend Repo Analyzer
 
-This small tool can analyze Git repositories and report metrics about them, these reports can be sent to email, text file, console, or even through json.
-This tool was designed to be plugable, can work with an unlimited number of repositories and metrics. Caching is used to save computing and time.
+This small tool can analyze Git repositories and report metrics about them, these will then be sent to Elastic/Kibana or optionally to file or the console.
+This tool was designed to be plugable, can work with an unlimited number of repositories and metrics.
 
 ## Table of Contents
 1. [Installation and usage ](#installation-and-usage)
@@ -16,88 +16,66 @@ This tool was designed to be plugable, can work with an unlimited number of repo
 
 ## Installation and Usage
 
-Prerequisites: [Node.js](https://nodejs.org/en/) (^8.10.0), npm version 5.X+.
+Prerequisites: [Node.js](https://nodejs.org/en/) (+8.x), npm version +6.X.
 
-You can install this tool globally using npm:
+To install run:
 
-`$ npm install frontend-repo-analyzer -g`
+`$ npm i @feedzai/repo-analyzer --save-dev`
 
-After installing the tool, you must configure it. The configuration isn’t trivial, therefore you must follow the steps in the next topic. (anchor)
+After installing the tool, we recommend that you add it to the npm scripts:
 
-Once you have installed and configured the tool correctly, you can run it:
+`"analyze": "repo-analyzer --username=john.doe --password=password"`
 
-`$ frontend-repo-analyzer `
+The `username` and `password` parameters will be used to connect to Kibana.
 
-You can specify additional configurations on the fly using arguments:
+The first time you run the tool it will create a `.repo-analyzer` file. We recommend the configuration to be but on a separate repository and be linked to in `.repo-analyzer`. The default file will point to the [feedzai configuration](https://github.com/feedzai/repo-analyzer-feedzai-config). If you want to use it you need to run:
 
-`$ frontend-repo-analyzer -file config.json`
+`$ npm i @feedzai/feedzai-config --save-dev`
 
-A detailed argument list can be found at the topic 3. (anchor)
+For details on what metrics are available here, plese consult the documentation in the [repo](https://github.com/feedzai/repo-analyzer-feedzai-config).
 
+One important detail: the Feedzai configuration assumes that your Kibana instance is on your local machine.
 
-## Configuration
+We recommend configuring the tool to run in CI at each commit.
 
-In order to use the tool you must configure it first. The tool loads the metrics and runs them against the specified repositories (specified in the config file). (anchor)
-Some metrics are available by default, but you can add yours very easily. Just follow this (anchor)
+It is also recommend to run the tool in the "history" mode to calculate historical data and have better dashboards (more details on that below).
 
+## History mode
 
-## Add custom metrics
+The tool is capable of collecting data about the project‘s history based on the commit history. 
+This feature may be useful if you want to know how your project has varied over time, and what impact some dependency made in your bundesize for example.
 
-Metrics can be user defined. In order to define a metric, you must create a file in the metrics folder with the format **“name.metric.js”**.  You can change this folder in the configuration file, by default it will be used the folder **“metrics”** inside the tool.
+In order to analyze the project’s history you just need to pass the “--history” flag into the tool:
+
+`$ npm run analyze -- --history`
+
+This will calculate the metrics in each commit. For large repos it's possible to pass a parameter that will do an exponential sampling as time goes back:
+
+`$ npm run analyze -- --history --factor=1`
+
+## Creating a custom configuration
+
+In some cases you might want to implement custom metrics or have a custom configuration.
+
+### Configuration file
+
+TODO document configuration file here
+
+### Creating new metrics
+
 When you create a new metric, you must implement the base metric and his main 3 methods ( info, verify, execute ). Both verify and execute are async.
 - **info()**: returns an object containing the metric name and group. This group can be modified in <file>. Grouping metrics can be useful when you have a lot of metrics.
 - **verify()**: returns a boolean and specifies whether its possible to run this metric for a given repository or not. For example, when calculation the coverage, if the repo does not have jest, it's impossible to calculate the metric therefore **verify()** should return false.
-- **execute()**: returns and object with the result for the metric being calculated. In this method occurs the calculation for the metric.  
-
-The metrics folder can be specified in the configuration file, more on this file can be found later in this documentation.
-
-## Custom config file
-
-The config file is responsible for holding the configuration for the tool. By default the tool will try to find **“fe-analyzer-config.json”** on your home folder, if it fails to load this file, it will look for **“default-fe-analyzer-config.json”** located in the tool’s folder. You can specify a custom configuration file through argument, passing the flag **“ -file config.json”**.
-
-## File Structure: 
-
-
-As you can see, the configuration file follows a simple structure:
-- **repos**: array of repositories, this are the repositories that are going to be analyzed.
-    - **gitRepoUrl** is the url where the tool will try to fetch the repository.
-    - **label** is used to name the project inside of the tool, it's also the name that will appear in the report.
-    - **target** branch is the branch that will be used to run the metrics.
-
-- **metrics-folder**: specifies where to load the metrics from.
-- **reporters**: As the name implies, this section contains the configurations used by the reporters. 
-    - **active**: in order to activate a report, you have to specify his name in this array. Possible reporters are : “email, “formated-file, “json”, “console”. 
-    - **email**: this object is passed directly to “node-mailer”. In order to obtain more information about its inner workings or configuration, you must visit: https://nodemailer.com/
-    - Later in this document, you can find more information about the reports and how to modify them.
-
-
- ```
- {
-  "repos": [ 
-    {
-      "gitRepoUrl": "https://github.com/feedzai/brushable-histogram.git",
-      "targetBranch": "master",
-      "label": "Histogram"
-    }
-  ],
-  "metrics-folder": "./metrics",
-  "reporters": {
-    "active": ["console", "formated-file"],
-    "formated-file":"./tmp/report.txt",
-    "console": {},
-    "json": {
-      "output-file": "./tmp/report.json"
-    }
-  }
-}
- ```
+- **execute()**: returns and object with the result for the metric being calculated. In this method occurs the calculation for the metric.
+- **schema()**: returns the schema configuration sent to Kibana/Elastic. If you don't to send the metrics to Kibana it is not necessary to implement this method.
+    
+Examples [here](https://github.com/feedzai/repo-analyzer-feedzai-config/tree/master/metrics).
 
  ## Reporters
 
- Reporters are one of the most important parts of this tool, they give us the information that we were looking for in the first place.
-There are 4 possible report types built-in in this tool: email, console, text file, json file.
-If you want to modify the email template you can do that by modifying the “pug” template file in “./email/grouped”.
-You can also add another templates and use them by specifying the name in the config file.
+Besides sending the data to Kibana it is also possible to output to a json file or to console.
+
+TODO: add details on how to do this.
 
 ## Arguments
 
@@ -107,11 +85,7 @@ You can also add another templates and use them by specifying the name in the co
 - factor <number> factor used to jump commits when calculating project's history. The bigger the factor the bigger the jumps.
 - history when used will calculate the history for the repos with "calculate-history": true in the config file
 
-## FAQ
-
-Some questions….
-
 ## License
 
-Some license agreement
+MIT
 
