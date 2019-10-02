@@ -73,7 +73,7 @@ function repoToConsoleLine(repo) {
             if (metric.info.name === metricNames[i]) {
                 if (metric.result === null) {
                     logger.err("error on table");
-                } else if (metric.result.result === undefined) {
+                } else if (metric.result == undefined || metric.result.result === undefined) {
                     line.push("-");
                 } else {
                     line.push(metric.result.result);
@@ -117,71 +117,6 @@ function reportToConsole(stats) {
     console.log(generateTable(stats));
 }
 
-/**
- * Reponsable to report the bundlesize metric results to elasticsearch
- * @param  {object} axiosInstance
- * @param  {object} metric
- * @param  {object} payload
- */
-function reportBundleSize(axiosInstance, metric, payload) {
-    payload.css = metric.result.result.css;
-    payload.js = metric.result.result.js;
-    payload.result = "-";
-
-    axiosInstance.post("/_doc", payload)
-        .then(function (response) {
-            logger.info("Record inserted into elastic");
-        })
-        .catch(function (error) {
-            logger.error("Error inserting into elastic");
-            logger.error(error);
-        });
-}
-
-/**
- * Reponsable to report the coverage metric results to elasticsearch
- * @param  {object} axiosInstance
- * @param  {object} metric
- * @param  {object} payload
- */
-function reportCoverage(axiosInstance, metric, payload) {
-    payload.statements = metric.result.result.statements;
-    payload.branch = metric.result.result.branch;
-
-    axiosInstance.post("/_doc", payload)
-        .then(function (response) {
-            logger.info("Record inserted into elastic");
-        })
-        .catch(function (error) {
-            logger.error("Error inserting into elastic");
-            logger.error(error);
-        });
-}
-
-/**
- * Reponsable to report the results of version metrics to elasticsearch
- * @param  {object} axiosInstance
- * @param  {object} metric
- * @param  {object} payload
- */
-function reportVersion(axiosInstance, metric, payload) {
-    let version = metric.result.result;
-
-    version = version.replace("^", "");
-    let versionArray = version.split(".");
-    const calculatedVersion = parseFloat(`${versionArray[0]}.${versionArray[1]}`);
-
-    payload.version = calculatedVersion;
-
-    axiosInstance.post("/_doc", payload)
-        .then(function (response) {
-            logger.info("Record inserted into elastic");
-        })
-        .catch(function (error) {
-            logger.error("Error inserting into elastic");
-            logger.error(error);
-        });
-}
 
 /**
  * Reports statistics to elasticSearch
@@ -190,6 +125,7 @@ function reportVersion(axiosInstance, metric, payload) {
  */
 function reportElastic(stats, elasticReporter, repository) {
     let time;
+
     stats.forEach((repo) => {
         if (_.isObject(repo)) {
             let repoObj = repository;
@@ -202,26 +138,27 @@ function reportElastic(stats, elasticReporter, repository) {
 
             if (_.isObject(repoObj)) {
                 time = utilities.getDateForCommit(utilities.getRepoFolder(repoObj), repo.hash);
-                if (_.isObject(repository)) {
+                console.log(time);
+                console.log(typeof time);
+                if (!_.isDate(time)) {
                     time = new Date();
                 }
                 if (_.isDate(time)) {
                     repo.metrics.forEach((metric) => {
                         if (_.isObject(metric)) {
-
                             let payload = {
                                 "project": repo.repository,
                                 "metric": `frontend_${metric.info.name.replace(/ /g, "_").toLowerCase()}`,
                                 timestamp: time,
                                 hash: repo.hash
                             };
-                            if (_.isObject(metric.result.result)) {
+                            if (_.isObject(metric.result) && _.isObject(metric.result.result)) {
                                 _.merge(payload, metric.result.result);
                             } else {
                                 _.merge(payload, metric.result);
                             }
 
-                            if (metric.info.name.includes("Version")) {
+                            if (_.isObject(metric.result) &&metric.info.name.includes("Version")) {
                                 let version = metric.result.result;
                                 version = version.replace("^", "");
                                 let versionArray = version.split(".");
@@ -251,8 +188,9 @@ function reportElastic(stats, elasticReporter, repository) {
  * @param  {Object} stats
  */
 function report(stats, repo) {
-    createIndexes(stats);
 
+    console.log("repo nos reports");
+    console.log(repo);
     reportElastic(stats, configs.getElasticReporter(), repo);
 
     if (configs.getAtiveReporters().includes("console")) {
