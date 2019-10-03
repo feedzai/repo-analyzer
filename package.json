@@ -22,7 +22,7 @@
     "url": "git@github.com:feedzai/repo-analyzer.git"
   },
   "dependencies": {
-    "@feedzai/analyzer-utilities": "^1.0.19",
+    "@feedzai/analyzer-utilities": "^1.0.22",
     "async": "^3.1.0",
     "axios": "^0.19.0",
     "axios-rate-limit": "^1.1.2",
