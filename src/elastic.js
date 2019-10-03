@@ -1,4 +1,4 @@
-const configs = require("@feedzai/analyzer-utilities/configs");
+const configs = require("./configs");
 const axios = require("axios");
 const logger = require("pino")({
     prettyPrint: { colorize: true },
@@ -45,7 +45,7 @@ function createIndexes() {
 
         elasticReporter = configs.getElasticReporter();
 
-        // put the new index into elasticsearch 
+        // put the new index into elasticsearch
         axios.put(`http://${elasticReporter.address}:${elasticReporter.port}/fe-${current.info().name.replace(/ /g, "-").toLowerCase()}`, base)
             .then(function (response) {
                 logger.info(`Index for '${current.info().name}' added successfully`);
