@@ -57,9 +57,9 @@ This will calculate the metrics in each commit. For large repos it's possible to
 
 In some cases you might want to implement custom metrics or have a custom configuration.
 
-### Configuration file
-
-TODO document configuration file here
+Currently the tool gets its configuration from an npm package, similarly to eslint. 
+The only requirements for this configuration project is that it returns an array with the metrics you want to use and some extra configuration. See this [repo](https://github.com/feedzai/repo-analyzer-feedzai-config) for an example.
+In order to use this custom configuration you must add the name of the package to the `.repo-analyzer` file and add your configuration as a dependency to your local project.
 
 ### Creating new metrics
 
@@ -75,15 +75,15 @@ Examples [here](https://github.com/feedzai/repo-analyzer-feedzai-config/tree/mas
 
 Besides sending the data to Kibana it is also possible to output to a json file or to console.
 
-TODO: add details on how to do this.
+See examples of how to do that [here](https://github.com/feedzai/repo-analyzer-feedzai-config/blob/master/index.js).
 
 ## Arguments
 
-- file <filename.json> : loads a specific configuration
-- user <elasticsearch user> used to send elasticsearch reports
-- password <elasticserach password>  used to send elasticsearch reports
-- factor <number> factor used to jump commits when calculating project's history. The bigger the factor the bigger the jumps.
-- history when used will calculate the history for the repos with "calculate-history": true in the config file
+- **file** <filename.json> : loads a specific configuration
+- **user** <elasticsearch user> used to send elasticsearch reports
+- **password** <elasticserach password>  used to send elasticsearch reports
+- **factor** <number> factor used to jump commits when calculating project's history. The bigger the factor the bigger the jumps.
+- **history** when used will calculate the history for the repos with "calculate-history": true in the config file
 
 ## License
 
