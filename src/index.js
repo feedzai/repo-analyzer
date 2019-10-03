@@ -14,8 +14,8 @@ const {
     checkoutToCommit,
     getPackageChecksum
 } = require("@feedzai/analyzer-utilities");
-const { installRepo, installRepoSync, getRepoName } = require("analyzer-utilities/repoMethods");
-const { getMetricsForRepo, } = require("analyzer-utilities/metricsMethods");
+const { installRepo, installRepoSync, getRepoName } = require("@feedzai/analyzer-utilities/repoMethods");
+const { getMetricsForRepo, } = require("@feedzai/analyzer-utilities/metricsMethods");
 const configs = require("@feedzai/analyzer-utilities/configs");
 const { reportElastic, report } = require("./reporters");
 const ncp = require('ncp').ncp;
