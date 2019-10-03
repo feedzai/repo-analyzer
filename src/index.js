@@ -13,10 +13,10 @@ const {
     getAllCommits,
     checkoutToCommit,
     getPackageChecksum
-} = require("analyzer-utilities");
-const { installRepo, installRepoSync, getRepoName } = require("analyzer-utilities/repoMethods");
-const {  getMetricsForRepo, } = require("analyzer-utilities/metricsMethods");
-const configs = require("analyzer-utilities/configs");
+} = require("@feedzai/analyzer-utilities");
+const { installRepo, installRepoSync, getRepoName } = require("@feedzai/analyzer-utilities/repoMethods");
+const { getMetricsForRepo, } = require("@feedzai/analyzer-utilities/metricsMethods");
+const configs = require("@feedzai/analyzer-utilities/configs");
 const { reportElastic, report } = require("./reporters");
 const ncp = require('ncp').ncp;
 const rimraf = require('rimraf');
@@ -97,12 +97,11 @@ function getHistory() {
     ncp.limit = 16;
 
     const source = process.cwd();
-    const destination = `${__dirname}/../tmp/`;
-    rimraf.sync(destination);
-
-    const local = `${path.dirname(__dirname)}/tmp`;
+    const local = `/tmp/repo-analyzer`;
+    rimraf.sync(local);
+    let repo;
     getRepoName(`${path.dirname(__dirname)}`).then(repoName => {
-        ncp(source, destination, {
+        ncp(source, local, {
             filter: function (name) {
                 if (name.includes("node_modules")) {
                     return false;
@@ -114,7 +113,7 @@ function getHistory() {
                 return logger.error(err);
             }
 
-            const repo = {
+            repo = {
                 label: repoName
             }
 
@@ -134,7 +133,7 @@ function getHistory() {
                                 installRepoSync(repo, local);
                                 lastCheckSum = getPackageChecksum(local);
                             }
-                            getMetricsForRepo(repo, destination).then((res) => {
+                            getMetricsForRepo(repo, local).then((res) => {
                                 if (_.isObject(res)) {
                                     res.hash = commitHash;
                                 }
@@ -144,7 +143,7 @@ function getHistory() {
                     }
                 }
                 async.series(funcs, function (err, results) {
-                    reportElastic(results, configs.getElasticReporter());
+                    report(results, repo);
                 });
             });
         });
@@ -156,7 +155,7 @@ configs.loadStandaloneConfig();
 
 if (configs.isHistoryActivated()) {
     getHistory();
-} else if (_.isBoolean(argv.elastic) && argv.elastic === true){
+} else if (_.isBoolean(argv.elastic) && argv.elastic === true) {
     elastic.loadMetrics();
     elastic.createIndexes();
 
