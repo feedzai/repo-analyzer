@@ -1,6 +1,6 @@
 {
   "name": "@feedzai/repo-analyzer",
-  "version": "0.0.117",
+  "version": "0.0.118",
   "description": "Analises a frontend repo to get consistency metrics",
   "main": "src/index.js",
   "scripts": {
