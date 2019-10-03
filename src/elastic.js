@@ -1,4 +1,4 @@
-const configs = require("analyzer-utilities/configs");
+const configs = require("@feedzai/analyzer-utilities/configs");
 const axios = require("axios");
 const logger = require("pino")({
     prettyPrint: { colorize: true },
