@@ -73,7 +73,7 @@ function repoToConsoleLine(repo) {
             if (metric.info.name === metricNames[i]) {
                 if (metric.result === null) {
                     logger.err("error on table");
-                } else if (metric.result == undefined || metric.result.result === undefined) {
+                } else if (!_.isObject(metric.result) || !_.isObject(metric.result.result)) {
                     line.push("-");
                 } else {
                     line.push(metric.result.result);
@@ -138,8 +138,6 @@ function reportElastic(stats, elasticReporter, repository) {
 
             if (_.isObject(repoObj)) {
                 time = utilities.getDateForCommit(utilities.getRepoFolder(repoObj), repo.hash);
-                console.log(time);
-                console.log(typeof time);
                 if (!_.isDate(time)) {
                     time = new Date();
                 }
@@ -189,8 +187,6 @@ function reportElastic(stats, elasticReporter, repository) {
  */
 function report(stats, repo) {
 
-    console.log("repo nos reports");
-    console.log(repo);
     reportElastic(stats, configs.getElasticReporter(), repo);
 
     if (configs.getAtiveReporters().includes("console")) {
