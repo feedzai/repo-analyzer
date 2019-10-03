@@ -7,7 +7,7 @@ const _ = require("lodash");
 const Table = require("cli-table");
 const axios = require("axios");
 const rateLimit = require("axios-rate-limit");
-const configs = require("/configs");
+const configs = require("./configs");
 const metricsMethods = require("@feedzai/analyzer-utilities/metricsMethods");
 const utilities = require("@feedzai/analyzer-utilities");
 

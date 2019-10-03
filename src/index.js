@@ -16,7 +16,7 @@ const {
 } = require("@feedzai/analyzer-utilities");
 const { installRepo, installRepoSync, getRepoName } = require("@feedzai/analyzer-utilities/repoMethods");
 const { getMetricsForRepo, } = require("@feedzai/analyzer-utilities/metricsMethods");
-const configs = require("/configs");
+const configs = require("./configs");
 const { report } = require("./reporters");
 const ncp = require('ncp').ncp;
 const rimraf = require('rimraf');
