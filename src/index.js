@@ -87,6 +87,14 @@ function* jumpGenerator(numberHashes) {
         yield i;
     }
 }
+function containsCommit(current) {
+    const commits = argv.commits.split(",");
+    for(let i=0; i<commits.length; i++){
+        if (parseInt(commits[i]) == current) {
+            return true;
+        }
+    }
+}
 
 /**
  * Calculates the history for the project based on the commit history
@@ -122,13 +130,12 @@ function getHistory() {
 
             getAllCommits(local).then((commitHashes) => {
                 if (_.isNumber(argv.de) && _.isNumber(argv.a)) {
-                    console.log(argv.de);
-                    console.log(argv.a);
-                    for (var i= argv.de ; i<=argv.a;i++) {
+                    for (var i = argv.de; i <= argv.a; i++) {
                         if (i < commitHashes.length) {
                             const commitHash = commitHashes[i];
                             funcs.push(function (callback) {
-                                logger.info(`Commit ${i} ou of ${commitHashes.length}`);
+                                const commitNumber = i;
+                                logger.info(`Commit ${commitNumber} ou of ${commitHashes.length}`);
                                 checkoutToCommit(local, commitHash);
                                 if (lastCheckSum !== getPackageChecksum(local)) {
                                     // works synchronously in order to ensure that the
@@ -146,6 +153,34 @@ function getHistory() {
                         }
                     }
                 }
+
+                else if (_.isString(argv.commits)) {
+                    for (var i = 0; i < commitHashes.length; i++) {
+                        if ((i < commitHashes.length) && containsCommit(i)) {
+                            const commitHash = commitHashes[i];
+                            funcs.push(function (callback) {
+                                console.log("fez push")
+                                const commitNumber = i;
+                                logger.info(`Commit ${commitNumber} ou of ${commitHashes.length}`);
+                                checkoutToCommit(local, commitHash);
+                                if (lastCheckSum !== getPackageChecksum(local)) {
+                                    // works synchronously in order to ensure that the
+                                    // pc would not crash due to too many npm installs at the same time
+                                    installRepoSync(repo, local);
+                                
+                                    lastCheckSum = getPackageChecksum(local);
+                                }
+                                getMetricsForRepo(repo, local).then((res) => {
+                                    if (_.isObject(res)) {
+                                        res.hash = commitHash;
+                                    }
+                                    callback(null, res);
+                                });
+                            });
+                        }
+                    }
+                }
+
                 else {
                     for (let i of jumpGenerator(commitHashes.length)) {
                         if (i < commitHashes.length) {
@@ -168,7 +203,7 @@ function getHistory() {
                             });
                         }
                     }
-                    
+
                 }
                 async.series(funcs, function (err, results) {
                     report(results, repo);
