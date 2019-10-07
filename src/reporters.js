@@ -76,9 +76,9 @@ function repoToConsoleLine(repo) {
                 } else if (!_.isObject(metric.result)) {
                     line.push("-");
                 } else {
-                    if (metric.includes("Bundle") && _.isObject(metric.result)) {
+                    if (metric.info.name.includes("Bundle") && _.isObject(metric.result)) {
                         line.push(`CSS: ${metric.result.css} JS:${metric.result.js}`);
-                    } else if (metric.includes("Coverage") && _.isObject(metric.result)) {
+                    } else if (metric.info.name.includes("Coverage") && _.isObject(metric.result)) {
                         line.push(`branchs: ${metric.result.branch} statements:${metric.result.statements}`);
                     }
                     line.push(metric.result.result);

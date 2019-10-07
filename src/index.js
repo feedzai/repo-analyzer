@@ -135,8 +135,8 @@ function getHistory() {
             let lastCheckSum;
 
             getAllCommits(local).then((commitHashes) => {
-                if (_.isNumber(argv.de) && _.isNumber(argv.a)) {
-                    for (var i = argv.de; i <= argv.a; i++) {
+                if (_.isNumber(argv.from) && _.isNumber(argv.to)) {
+                    for (var i = argv.from; i <= argv.to; i++) {
                         if (i < commitHashes.length) {
                             const commitHash = commitHashes[i];
                             funcs.push(function (callback) {
@@ -165,7 +165,6 @@ function getHistory() {
                         if ((i < commitHashes.length) && containsCommit(i)) {
                             const commitHash = commitHashes[i];
                             funcs.push(function (callback) {
-                                console.log("fez push")
                                 const commitNumber = i;
                                 logger.info(`Commit ${commitNumber} ou of ${commitHashes.length}`);
                                 checkoutToCommit(local, commitHash);
