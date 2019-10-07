@@ -87,6 +87,12 @@ function* jumpGenerator(numberHashes) {
         yield i;
     }
 }
+
+/**
+ *  Checks whether a commit has to be analyzed or not.
+ *  used when analyzing history given a array of commits
+ * @param  {int} current
+ */
 function containsCommit(current) {
     const commits = argv.commits.split(",");
     for(let i=0; i<commits.length; i++){
