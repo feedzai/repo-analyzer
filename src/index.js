@@ -121,26 +121,54 @@ function getHistory() {
             let lastCheckSum;
 
             getAllCommits(local).then((commitHashes) => {
-                for (let i of jumpGenerator(commitHashes.length)) {
-                    if (i < commitHashes.length) {
-                        const commitHash = commitHashes[i];
-                        funcs.push(function (callback) {
-                            logger.info(`Commit ${i} ou of ${commitHashes.length}`);
-                            checkoutToCommit(local, commitHash);
-                            if (lastCheckSum !== getPackageChecksum(local)) {
-                                // works synchronously in order to ensure that the
-                                // pc would not crash due to too many npm installs at the same time
-                                installRepoSync(repo, local);
-                                lastCheckSum = getPackageChecksum(local);
-                            }
-                            getMetricsForRepo(repo, local).then((res) => {
-                                if (_.isObject(res)) {
-                                    res.hash = commitHash;
+                if (_.isNumber(argv.de) && _.isNumber(argv.a)) {
+                    console.log(argv.de);
+                    console.log(argv.a);
+                    for (var i= argv.de ; i<=argv.a;i++) {
+                        if (i < commitHashes.length) {
+                            const commitHash = commitHashes[i];
+                            funcs.push(function (callback) {
+                                logger.info(`Commit ${i} ou of ${commitHashes.length}`);
+                                checkoutToCommit(local, commitHash);
+                                if (lastCheckSum !== getPackageChecksum(local)) {
+                                    // works synchronously in order to ensure that the
+                                    // pc would not crash due to too many npm installs at the same time
+                                    installRepoSync(repo, local);
+                                    lastCheckSum = getPackageChecksum(local);
                                 }
-                                callback(null, res);
+                                getMetricsForRepo(repo, local).then((res) => {
+                                    if (_.isObject(res)) {
+                                        res.hash = commitHash;
+                                    }
+                                    callback(null, res);
+                                });
                             });
-                        });
+                        }
                     }
+                }
+                else {
+                    for (let i of jumpGenerator(commitHashes.length)) {
+                        if (i < commitHashes.length) {
+                            const commitHash = commitHashes[i];
+                            funcs.push(function (callback) {
+                                logger.info(`Commit ${i} ou of ${commitHashes.length}`);
+                                checkoutToCommit(local, commitHash);
+                                if (lastCheckSum !== getPackageChecksum(local)) {
+                                    // works synchronously in order to ensure that the
+                                    // pc would not crash due to too many npm installs at the same time
+                                    installRepoSync(repo, local);
+                                    lastCheckSum = getPackageChecksum(local);
+                                }
+                                getMetricsForRepo(repo, local).then((res) => {
+                                    if (_.isObject(res)) {
+                                        res.hash = commitHash;
+                                    }
+                                    callback(null, res);
+                                });
+                            });
+                        }
+                    }
+                    
                 }
                 async.series(funcs, function (err, results) {
                     report(results, repo);
