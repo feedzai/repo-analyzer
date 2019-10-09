@@ -73,9 +73,14 @@ function repoToConsoleLine(repo) {
             if (metric.info.name === metricNames[i]) {
                 if (metric.result === null) {
                     logger.err("error on table");
-                } else if (!_.isObject(metric.result) || !_.isObject(metric.result.result)) {
+                } else if (!_.isObject(metric.result)) {
                     line.push("-");
                 } else {
+                    if (metric.info.name.includes("Bundle") && _.isObject(metric.result)) {
+                        line.push(`CSS: ${metric.result.css} JS:${metric.result.js}`);
+                    } else if (metric.info.name.includes("Coverage") && _.isObject(metric.result)) {
+                        line.push(`branchs: ${metric.result.branch} statements:${metric.result.statements}`);
+                    }
                     line.push(metric.result.result);
                 }
             }
@@ -156,7 +161,7 @@ function reportElastic(stats, elasticReporter, repository) {
                                 _.merge(payload, metric.result);
                             }
 
-                            if (_.isObject(metric.result) &&metric.info.name.includes("Version")) {
+                            if (_.isObject(metric.result) && metric.info.name.includes("Version")) {
                                 let version = metric.result.result;
                                 version = version.replace("^", "");
                                 let versionArray = version.split(".");

@@ -89,6 +89,20 @@ function* jumpGenerator(numberHashes) {
 }
 
 /**
+ *  Checks whether a commit has to be analyzed or not.
+ *  used when analyzing history given a array of commits
+ * @param  {int} current
+ */
+function containsCommit(current) {
+    const commits = argv.commits.split(",");
+    for(let i=0; i<commits.length; i++){
+        if (parseInt(commits[i]) == current) {
+            return true;
+        }
+    }
+}
+
+/**
  * Calculates the history for the project based on the commit history
  */
 function getHistory() {
@@ -121,26 +135,80 @@ function getHistory() {
             let lastCheckSum;
 
             getAllCommits(local).then((commitHashes) => {
-                for (let i of jumpGenerator(commitHashes.length)) {
-                    if (i < commitHashes.length) {
-                        const commitHash = commitHashes[i];
-                        funcs.push(function (callback) {
-                            logger.info(`Commit ${i} ou of ${commitHashes.length}`);
-                            checkoutToCommit(local, commitHash);
-                            if (lastCheckSum !== getPackageChecksum(local)) {
-                                // works synchronously in order to ensure that the
-                                // pc would not crash due to too many npm installs at the same time
-                                installRepoSync(repo, local);
-                                lastCheckSum = getPackageChecksum(local);
-                            }
-                            getMetricsForRepo(repo, local).then((res) => {
-                                if (_.isObject(res)) {
-                                    res.hash = commitHash;
+                if (_.isNumber(argv.from) && _.isNumber(argv.to)) {
+                    for (var i = argv.from; i <= argv.to; i++) {
+                        if (i < commitHashes.length) {
+                            const commitHash = commitHashes[i];
+                            funcs.push(function (callback) {
+                                const commitNumber = i;
+                                logger.info(`Commit ${commitNumber} ou of ${commitHashes.length}`);
+                                checkoutToCommit(local, commitHash);
+                                if (lastCheckSum !== getPackageChecksum(local)) {
+                                    // works synchronously in order to ensure that the
+                                    // pc would not crash due to too many npm installs at the same time
+                                    installRepoSync(repo, local);
+                                    lastCheckSum = getPackageChecksum(local);
                                 }
-                                callback(null, res);
+                                getMetricsForRepo(repo, local).then((res) => {
+                                    if (_.isObject(res)) {
+                                        res.hash = commitHash;
+                                    }
+                                    callback(null, res);
+                                });
                             });
-                        });
+                        }
                     }
+                }
+
+                else if (_.isString(argv.commits)) {
+                    for (var i = 0; i < commitHashes.length; i++) {
+                        if ((i < commitHashes.length) && containsCommit(i)) {
+                            const commitHash = commitHashes[i];
+                            funcs.push(function (callback) {
+                                const commitNumber = i;
+                                logger.info(`Commit ${commitNumber} ou of ${commitHashes.length}`);
+                                checkoutToCommit(local, commitHash);
+                                if (lastCheckSum !== getPackageChecksum(local)) {
+                                    // works synchronously in order to ensure that the
+                                    // pc would not crash due to too many npm installs at the same time
+                                    installRepoSync(repo, local);
+                                
+                                    lastCheckSum = getPackageChecksum(local);
+                                }
+                                getMetricsForRepo(repo, local).then((res) => {
+                                    if (_.isObject(res)) {
+                                        res.hash = commitHash;
+                                    }
+                                    callback(null, res);
+                                });
+                            });
+                        }
+                    }
+                }
+
+                else {
+                    for (let i of jumpGenerator(commitHashes.length)) {
+                        if (i < commitHashes.length) {
+                            const commitHash = commitHashes[i];
+                            funcs.push(function (callback) {
+                                logger.info(`Commit ${i} ou of ${commitHashes.length}`);
+                                checkoutToCommit(local, commitHash);
+                                if (lastCheckSum !== getPackageChecksum(local)) {
+                                    // works synchronously in order to ensure that the
+                                    // pc would not crash due to too many npm installs at the same time
+                                    installRepoSync(repo, local);
+                                    lastCheckSum = getPackageChecksum(local);
+                                }
+                                getMetricsForRepo(repo, local).then((res) => {
+                                    if (_.isObject(res)) {
+                                        res.hash = commitHash;
+                                    }
+                                    callback(null, res);
+                                });
+                            });
+                        }
+                    }
+
                 }
                 async.series(funcs, function (err, results) {
                     report(results, repo);
