@@ -72,7 +72,7 @@ function repoToConsoleLine(repo) {
         repo.metrics.forEach((metric) => {
             if (metric.info.name === metricNames[i]) {
                 if (metric.result === null) {
-                    logger.err("error on table");
+                    logger.error("error on table");
                 } else if (!_.isObject(metric.result)) {
                     line.push("-");
                 } else {
