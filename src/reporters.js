@@ -127,6 +127,7 @@ function reportToConsole(stats) {
  * Reports statistics to elasticSearch
  * @param  {object} stats
  * @param  {object} elasticReporter
+ * @param {object} repository
  */
 function reportElastic(stats, elasticReporter, repository) {
     let time;
@@ -155,6 +156,7 @@ function reportElastic(stats, elasticReporter, repository) {
                                 timestamp: time,
                                 hash: repo.hash
                             };
+
                             if (_.isObject(metric.result) && _.isObject(metric.result.result)) {
                                 _.merge(payload, metric.result.result);
                             } else {
@@ -163,21 +165,22 @@ function reportElastic(stats, elasticReporter, repository) {
 
                             if (_.isObject(metric.result) && metric.info.name.includes("Version")) {
                                 let version = metric.result.result;
+
                                 version = version.replace("^", "");
                                 let versionArray = version.split(".");
                                 const calculatedVersion = parseFloat(`${versionArray[0]}.${versionArray[1]}`);
+
                                 payload.result = calculatedVersion;
                             }
 
                             instanceAxios.post(`/fe-${metric.info.name.replace(/ /g, "-").toLowerCase()}/_doc`, payload)
-                                .then(function (response) {
+                                .then(function () {
                                     logger.info("Record inserted into elastic");
                                 })
                                 .catch(function (error) {
                                     logger.error("Error inserting into elastic");
                                     logger.error(error);
                                 });
-
                         }
                     });
                 }
@@ -189,9 +192,9 @@ function reportElastic(stats, elasticReporter, repository) {
 /**
  * Responsable to process the reports
  * @param  {Object} stats
+ * @param {repo} repo
  */
 function report(stats, repo) {
-
     reportElastic(stats, configs.getElasticReporter(), repo);
 
     if (configs.getAtiveReporters().includes("console")) {
@@ -210,5 +213,5 @@ function report(stats, repo) {
 
 module.exports = {
     report,
-    reportElastic,
+    reportElastic
 };

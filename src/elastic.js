@@ -43,16 +43,17 @@ function createIndexes() {
         // merge the keys from the schema into the complete metric
         _.merge(base.mappings.properties, current.schema());
 
-        elasticReporter = configs.getElasticReporter();
+        const elasticReporter = configs.getElasticReporter();
 
-        // put the new index into elasticsearch 
-        axios.put(`http://${elasticReporter.address}:${elasticReporter.port}/fe-${current.info().name.replace(/ /g, "-").toLowerCase()}`, base)
-            .then(function (response) {
+        // put the new index into elasticsearch
+        axios.put(`http://${elasticReporter.address}:${elasticReporter.port}/fe-${current.info().name.replace(/ /g, "-")
+            .toLowerCase()}`, base)
+            .then(function () {
                 logger.info(`Index for '${current.info().name}' added successfully`);
             })
             .catch(function (error) {
                 logger.error("Error inserting into elastic");
-                logger.error(error)
+                logger.error(error);
             });
     });
 }
@@ -61,4 +62,4 @@ function createIndexes() {
 module.exports = {
     loadMetrics,
     createIndexes
-}
+};
