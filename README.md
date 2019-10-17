@@ -1,5 +1,7 @@
 # Frontend Repo Analyzer
 
+[![Build Status](https://travis-ci.com/feedzai/repo-analyzer.svg?branch=master)](https://travis-ci.com/feedzai/repo-analyzer)
+
 This small tool can analyze Git repositories and report metrics about them, these will then be sent to Elastic/Kibana or optionally to file or the console.
 This tool was designed to be plugable, can work with an unlimited number of repositories and metrics.
 
