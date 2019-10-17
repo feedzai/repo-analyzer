@@ -79,12 +79,14 @@ See examples of how to do that [here](https://github.com/feedzai/repo-analyzer-f
 
 ## Arguments
 
-- **file** <filename.json> : loads a specific configuration
-- **user** <elasticsearch user> used to send elasticsearch reports
-- **password** <elasticserach password>  used to send elasticsearch reports
-- **factor** <number> factor used to jump commits when calculating project's history. The bigger the factor the bigger the jumps.
-- **history** when used will calculate the history for the repos with "calculate-history": true in the config file
-
+- **username=elastic**  Elastic's username required to send elasticsearch reports to protected instances.
+- **password=password** Elastic's password needed to send elasticsearch reports. Only valid when using the **username** flag.
+- **factor=1** Factor used to jump commits when calculating project's history. The bigger the factor the bigger the jumps.
+- **history** when used will calculate the history for the repos with "calculate-history": true in the config file.
+- **elastic** creates elasticsearch's indexes automatically based on the metrics loaded and its schema.
+- **commits=1,2,3** analyzes a group of commits, this flag is only valid when analyzing the history
+- **from=1** the commit to start analyze, only valid when used with **to** when running on history mode.
+- **to=10** the commit where it stop calculating, only valid when used with **from** and in history mode.
 ## License
 
 MIT
