@@ -3,6 +3,8 @@
 This small tool can analyze Git repositories and report metrics about them, these will then be sent to Elastic/Kibana or optionally to file or the console.
 This tool was designed to be plugable, can work with an unlimited number of repositories and metrics.
 
+![Repo Analyzer](https://github.com/feedzai/repo-analyzer/blob/master/repo-analyzer.png?raw=true)
+
 ## Table of Contents
 1. [Installation and usage ](#installation-and-usage)
 2. [Configuration](#configuration)
@@ -26,19 +28,27 @@ After installing the tool, we recommend that you add it to the npm scripts:
 
 `"analyze": "repo-analyzer --username=john.doe --password=password"`
 
-The `username` and `password` parameters will be used to connect to Kibana.
+The `username` and `password` parameters will be used to connect to Elasticsearch.
 
-The first time you run the tool it will create a `.repo-analyzer` file. We recommend the configuration to be but on a separate repository and be linked to in `.repo-analyzer`. The default file will point to the [feedzai configuration](https://github.com/feedzai/repo-analyzer-feedzai-config). If you want to use it you need to run:
+More detail on this configuration can be found in the next section.
+
+The first time you run the tool it will create a `.repo-analyzer` file. We recommend the configuration to be on a separate repository and be linked to in `.repo-analyzer`. The default file will point to the [feedzai configuration](https://github.com/feedzai/repo-analyzer-feedzai-config). If you want to use it you need to run:
 
 `$ npm i @feedzai/feedzai-config --save-dev`
 
 For details on what metrics are available here, plese consult the documentation in the [repo](https://github.com/feedzai/repo-analyzer-feedzai-config).
 
-One important detail: the Feedzai configuration assumes that your Kibana instance is on your local machine.
-
 We recommend configuring the tool to run in CI at each commit.
 
 It is also recommend to run the tool in the "history" mode to calculate historical data and have better dashboards (more details on that below).
+
+### Configure Elasticsearch/Kibana
+
+In order to use the whole potencial provided by the tool, we recommend you to use elasticsearch and kibana. They will provide a pretty good way to store and visualize your data.
+
+You can find the complete configuration guide [here](https://github.com/feedzai/repo-analyzer-feedzai-config/blob/master/elastic.md)
+
+One important detail: the Feedzai configuration assumes that your Kibana instance is on your local machine.
 
 ## History mode
 
