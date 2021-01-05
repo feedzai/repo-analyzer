@@ -25,7 +25,7 @@
     "@feedzai/analyzer-utilities": "^1.0.47",
     "@feedzai/eslint-config-feedzai": "^4.0.1",
     "async": "^3.1.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "axios-rate-limit": "^1.1.2",
     "cli-table": "^0.3.1",
     "email-templates": "^6.0.0",
